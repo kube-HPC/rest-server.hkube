@@ -1,0 +1,28 @@
+{
+  "name": "rest-server.rf",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0"
+  },
+  "devDependencies": {
+    "chai": "^3.3.0",
+    "mockery": "^1.4.0",
+    "sinon": "^1.17.1"
+  },
+  "scripts": {
+    "test": "mocha tests"
+  },
+  "keywords": [
+    "rest",
+    "http"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.rms:RMS-Common/rest-server.git"
+  },
+  "author": "Nassi Harel",
+  "license": "ISC"
+}
