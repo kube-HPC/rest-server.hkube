@@ -4,23 +4,29 @@
 
 'use strict';
 
-var chai = require("chai");
-var expect = chai.expect;
-var sinon = require('sinon');
-var mockery = require('mockery');
-var RestServer = require('./index');
-var cors = require('./middlewares/cors');
-var rest = new RestServer();
+const chai = require("chai");
+const expect = chai.expect;
+const sinon = require('sinon');
+const mockery = require('mockery');
+const RestServer = require('../index');
+const cors = require('../middlewares/cors');
+let rest = null;
 
-var options = {
+const options = {
     serviceName: 'test',
     port: 3000
 };
 
 describe('Jobs', function () {
-
+    beforeEach(() => {
+        rest = new RestServer();
+    });
+    afterEach(async () => {
+        if (rest) {
+            await rest.stop();
+        }
+    });
     describe('Actions', function () {
-
         it('should reject with error missing: options', function (done) {
             rest.start().catch(function (error) {
                 expect(error.message).to.equal('parameter missing: options');
@@ -33,8 +39,10 @@ describe('Jobs', function () {
                 done();
             });
         });
+
+
         it('should reject with error positive port number', function (done) {
-            rest.start({port: -1}).catch(function (error) {
+            rest.start({ port: -1 }).catch(function (error) {
                 expect(error.message).to.equal('port must be a positive number');
                 done();
             });
@@ -42,13 +50,13 @@ describe('Jobs', function () {
         it('should start the app rest api', function (done) {
 
             var routes = [
-                {route: '/catalog', router: null}
+                { route: '/catalog', router: null }
             ];
             var middlewares = [cors];
             rest.on('error', function (res) {
             });
             var opt = {
-                swagger: {file: __dirname + '/swagger.json'},
+                swagger: { file: __dirname + '/swagger.json' },
                 name: options.serviceName,
                 middlewares: middlewares,
                 routes: routes,
