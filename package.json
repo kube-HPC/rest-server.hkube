@@ -1,5 +1,5 @@
 {
-  "name": "rest-server.hkube",
+  "name": "@hkube/rest-server",
   "version": "1.0.3",
   "description": "",
   "main": "index.js",
