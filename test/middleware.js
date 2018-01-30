@@ -3,10 +3,8 @@
  */
 
 
-const chai = require("chai");
-const expect = chai.expect;
+const { expect } = require("chai");
 const sinon = require('sinon');
-const mockery = require('mockery');
 const express = require('express');
 const RestServer = require('../index');
 const request = require('supertest');
@@ -45,18 +43,17 @@ describe('middlewares', function () {
             };
             rest.start(opt).then((result) => {
                 request(rest._app)
-                .get('/test1')
-                .expect(200,'test1')
-                .then((res)=>{
-                    console.log(res);
-                    done() 
-                })
+                    .get('/test1')
+                    .expect(200, 'test1')
+                    .then((res) => {
+                        done()
+                    })
             });
         });
         it('should run with before middleware', (done) => {
             let whatToReturn = 'test1';
             const emptyRoute = (req, res, next) => { res.send(whatToReturn); next(); };
-            const beforeMiddle = (req, res, next) => { whatToReturn='test2'; next(); };
+            const beforeMiddle = (req, res, next) => { whatToReturn = 'test2'; next(); };
             var routes = [
                 {
                     route: '/test1',
@@ -72,19 +69,18 @@ describe('middlewares', function () {
             };
             rest.start(opt).then((result) => {
                 request(rest._app)
-                .get('/test1')
-                .expect(200,'test2')
-                .then((res)=>{
-                    console.log(res);
-                    done() 
-                })
+                    .get('/test1')
+                    .expect(200, 'test2')
+                    .then((res) => {
+                        done()
+                    })
             });
         });
 
         it('should run with after middleware', (done) => {
             let whatToReturn = 'test1';
             const emptyRoute = (req, res, next) => { res.send(whatToReturn); next(); };
-            const afterMiddle = (req, res, next) => { whatToReturn='test2'; next(); };
+            const afterMiddle = (req, res, next) => { whatToReturn = 'test2'; next(); };
             const afterSpy = sinon.spy(afterMiddle);
             var routes = [
                 {
@@ -101,20 +97,20 @@ describe('middlewares', function () {
             };
             rest.start(opt).then((result) => {
                 request(rest._app)
-                .get('/test1')
-                .expect(200,'test1')
-                .then((res)=>{
-                    expect(afterSpy.callCount).to.eq(1);
-                    done() 
-                })
+                    .get('/test1')
+                    .expect(200, 'test1')
+                    .then((res) => {
+                        expect(afterSpy.callCount).to.eq(1);
+                        done()
+                    })
             });
         });
 
         it('should run with before and after middleware', (done) => {
             let whatToReturn = 'test1';
             const emptyRoute = (req, res, next) => { res.send(whatToReturn); next(); };
-            const beforeMiddle = (req, res, next) => { whatToReturn='test2'; next(); };
-            const afterMiddle = (req, res, next) => { whatToReturn='test3'; next(); };
+            const beforeMiddle = (req, res, next) => { whatToReturn = 'test2'; next(); };
+            const afterMiddle = (req, res, next) => { whatToReturn = 'test3'; next(); };
             const afterSpy = sinon.spy(afterMiddle);
             var routes = [
                 {
@@ -129,16 +125,16 @@ describe('middlewares', function () {
                 port: options.port,
                 afterRoutesMiddlewares: [afterSpy],
                 beforeRoutesMiddlewares: [beforeMiddle]
-                
+
             };
             rest.start(opt).then((result) => {
                 request(rest._app)
-                .get('/test1')
-                .expect(200,'test2')
-                .then((res)=>{
-                    expect(afterSpy.callCount).to.eq(1);
-                    done() 
-                })
+                    .get('/test1')
+                    .expect(200, 'test2')
+                    .then((res) => {
+                        expect(afterSpy.callCount).to.eq(1);
+                        done()
+                    })
             });
         });
 

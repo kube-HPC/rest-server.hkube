@@ -7,7 +7,6 @@
 const chai = require("chai");
 const expect = chai.expect;
 const sinon = require('sinon');
-const mockery = require('mockery');
 const RestServer = require('../index');
 const cors = require('../middlewares/cors');
 let rest = null;

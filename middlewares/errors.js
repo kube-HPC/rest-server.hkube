@@ -3,17 +3,16 @@
  * Error handler middleware
  */
 
-const errors = (err, req, res, next) => {
-    const status = err.status || 500;
+const errors = (error, req, res, next) => {
+    const status = error.status || 500;
     res.status(status);
     res.json({
         error: {
             code: status,
-            message: err.message
+            message: error.message
         }
     });
-    const error = {error: err, status: status};
-    next(error);
+    next({ error, status, req, res });
 };
 
 module.exports = errors;
