@@ -6,6 +6,7 @@
   "dependencies": {
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
+    "express-rate-limit": "^2.11.0",
     "supertest": "^3.0.0"
   },
   "devDependencies": {
@@ -17,11 +18,12 @@
     "eslint-plugin-import": "^2.8.0",
     "istanbul": "^1.1.0-alpha.1",
     "mocha": "^4.1.0",
+    "request": "^2.83.0",
     "sinon": "^4.1.3"
   },
   "scripts": {
-    "test": "mocha test --colors --recursive --exit",
-    "test-travis": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -R spec test --exit",
+    "test": "mocha tests --colors --recursive --exit",
+    "test-travis": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -R spec tests --exit",
     "build": "npm publish"
   },
   "keywords": [

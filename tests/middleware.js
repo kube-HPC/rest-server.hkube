@@ -2,7 +2,6 @@
  * Created by nassi on 28/08/16.
  */
 
-
 const { expect } = require("chai");
 const sinon = require('sinon');
 const express = require('express');
@@ -29,15 +28,14 @@ describe('middlewares', function () {
         it('should run without before middleware', (done) => {
             let whatToReturn = 'test1';
             const emptyRoute = (req, res, next) => { res.send(whatToReturn); next(); };
-            var routes = [
+            const routes = [
                 {
                     route: '/test1',
                     router: express.Router().get('/', emptyRoute)
                 }
             ];
-            var opt = {
+            const opt = {
                 name: options.serviceName,
-                // middlewares: middlewares,
                 routes: routes,
                 port: options.port
             };
@@ -76,7 +74,6 @@ describe('middlewares', function () {
                     })
             });
         });
-
         it('should run with after middleware', (done) => {
             let whatToReturn = 'test1';
             const emptyRoute = (req, res, next) => { res.send(whatToReturn); next(); };
@@ -105,7 +102,6 @@ describe('middlewares', function () {
                     })
             });
         });
-
         it('should run with before and after middleware', (done) => {
             let whatToReturn = 'test1';
             const emptyRoute = (req, res, next) => { res.send(whatToReturn); next(); };
@@ -137,8 +133,6 @@ describe('middlewares', function () {
                     })
             });
         });
-
     });
-
 });
 
