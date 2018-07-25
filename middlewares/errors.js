@@ -9,7 +9,8 @@ const errors = (error, req, res, next) => {
     res.json({
         error: {
             code: status,
-            message: error.message
+            message: error.message,
+            details: error.details
         }
     });
     next({ error, status, req, res });
