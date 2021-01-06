@@ -7,6 +7,7 @@
     "body-parser": "^1.18.3",
     "express": "^4.16.3",
     "express-rate-limit": "^2.11.0",
+    "fs-extra": "^9.0.1",
     "js-yaml": "^4.0.0",
     "json-refs": "^3.0.15",
     "swagger-parser": "^10.0.2"

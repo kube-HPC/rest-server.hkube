@@ -5,6 +5,7 @@
 module.exports = require('./lib/app-server');
 module.exports.swaggerUtils = {
     loader: require('./lib/swagger-loader'),
-    builder: require('./lib/swagger-builder')
+    builder: require('./lib/swagger-builder'),
+    validator: require('./lib/swagger-validator')
 };
 
