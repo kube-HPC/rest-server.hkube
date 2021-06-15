@@ -3,7 +3,7 @@
  * X-Powered-By middleware
  */
 
-const powered = (poweredBy) => (req, res, next) => {
+const powered = poweredBy => (req, res, next) => {
     res.setHeader('X-Powered-By', poweredBy);
     next();
 };
