@@ -7,7 +7,7 @@ const logger = emitter => (req, res, next) => {
     res.on('finish', () => {
         const end = now();
         const status = res.statusCode;
-        const duration = (start - end).toFixed(2);
+        const duration = (end - start).toFixed(2);
         emitter.emit('request', { method, url, status, duration });
     });
     next();
