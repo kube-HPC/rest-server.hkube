@@ -15,7 +15,7 @@ const logger = (options) => {
         }
         if (onResponse) {
             const start = now();
-            res.on('finish', () => {
+            res.on('close', () => {
                 const end = now();
                 const status = res.statusCode;
                 const duration = (end - start).toFixed(2);
