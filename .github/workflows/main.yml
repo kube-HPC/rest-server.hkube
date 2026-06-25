@@ -49,7 +49,8 @@ jobs:
           git config --local user.name "GitHub Action"
       - name: version
         run: |
-          git checkout -f -b version-branch
+          git fetch origin master
+          git checkout -f -b version-branch FETCH_HEAD
           npm version patch --no-commit-hooks -m "$(git log -1 --pretty=%B) .... bump version [skip ci]"
           git push origin version-branch:master --follow-tags
       - uses: actions/setup-node@v4 # Use v4 for OIDC support
