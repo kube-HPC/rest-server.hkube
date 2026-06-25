@@ -35,6 +35,45 @@ function _request(options) {
     });
 }
 
+// minimal in-memory fake of a redis client, implementing only the
+// commands used by rate-limit-redis (multi/incr/pttl/exec/pexpire/del).
+function createFakeRedisClient() {
+    const store = Object.create(null);
+    const ttl = Object.create(null);
+    const client = {
+        connected: true,
+        multi() {
+            const queue = [];
+            const chain = {
+                incr(key) {
+                    queue.push(() => { store[key] = (store[key] || 0) + 1; return store[key]; });
+                    return chain;
+                },
+                decr(key) {
+                    queue.push(() => { store[key] = (store[key] || 0) - 1; return store[key]; });
+                    return chain;
+                },
+                pttl(key) {
+                    queue.push(() => (key in ttl ? ttl[key] : -1));
+                    return chain;
+                },
+                exec(cb) {
+                    cb(null, queue.map(fn => fn()));
+                }
+            };
+            return chain;
+        },
+        pexpire(key, ms) {
+            ttl[key] = ms;
+        },
+        del(key) {
+            delete store[key];
+            delete ttl[key];
+        }
+    };
+    return client;
+}
+
 describe('Jobs', function () {
     beforeEach(() => {
         rest = new RestServer();
@@ -194,6 +233,142 @@ describe('Jobs', function () {
                 }
                 Promise.all(promises).then(response => {
                     expect(response.map(r => r.body)).to.deep.equal(results);
+                    done();
+                });
+            });
+        });
+        it('should throw 429 Too Many Requests using redis store', function (done) {
+            this.timeout(10000);
+            const redisClient = createFakeRedisClient();
+            sinon.spy(redisClient, 'multi');
+            const routers = (options) => {
+                const router = express.Router();
+                router.get('/', (req, res, next) => {
+                    res.json({ message: `hello from api` });
+                    next();
+                });
+                return router;
+            };
+            const routes = [
+                { route: '/api/test', router: routers() }
+            ];
+
+            const opt = {
+                name: options.serviceName,
+                routes: routes,
+                port: options.port,
+                rateLimit: {
+                    route: '/api',
+                    ms: 2000,
+                    max: 5,
+                    delay: 0,
+                    redis: {
+                        enabled: true,
+                        client: redisClient
+                    }
+                }
+            };
+            rest.start(opt).then(function (result) {
+                const promises = [];
+                for (let i = 0; i < 10; i++) {
+                    promises.push(_request({ uri: 'http://localhost:3000/api/test' }))
+                }
+                Promise.all(promises).catch(response => {
+                    expect(response.statusCode).to.equal(429);
+                    expect(response.statusMessage).to.equal('Too Many Requests');
+                    // the redis store was engaged for the rate limiting,
+                    // so the default in-memory store was not used
+                    expect(redisClient.multi.callCount).to.be.above(0);
+                    done();
+                });
+            });
+        });
+        it('should not use redis store when redis config is disabled', function (done) {
+            this.timeout(10000);
+            const redisClient = createFakeRedisClient();
+            sinon.spy(redisClient, 'multi');
+            const routers = (options) => {
+                const router = express.Router();
+                router.get('/', (req, res, next) => {
+                    res.json({ message: `hello from api` });
+                    next();
+                });
+                return router;
+            };
+            const routes = [
+                { route: '/api/test', router: routers() }
+            ];
+
+            const opt = {
+                name: options.serviceName,
+                routes: routes,
+                port: options.port,
+                rateLimit: {
+                    route: '/api',
+                    ms: 2000,
+                    max: 5,
+                    delay: 0,
+                    redis: {
+                        enabled: false,
+                        client: redisClient
+                    }
+                }
+            };
+            rest.start(opt).then(function (result) {
+                const promises = [];
+                for (let i = 0; i < 10; i++) {
+                    promises.push(_request({ uri: 'http://localhost:3000/api/test' }))
+                }
+                Promise.all(promises).catch(response => {
+                    expect(response.statusCode).to.equal(429);
+                    expect(response.statusMessage).to.equal('Too Many Requests');
+                    // the redis store was never engaged, so the default
+                    // in-memory store is the one enforcing the rate limit
+                    expect(redisClient.multi.callCount).to.equal(0);
+                    done();
+                });
+            });
+        });
+        it('should use the in-memory store when redis object is omitted', function (done) {
+            this.timeout(10000);
+            // redis is omitted in the options,
+            // so the rate limiter must fall back to the default in-memory store
+            const redisClient = createFakeRedisClient();
+            sinon.spy(redisClient, 'multi');
+            const routers = (options) => {
+                const router = express.Router();
+                router.get('/', (req, res, next) => {
+                    res.json({ message: `hello from api` });
+                    next();
+                });
+                return router;
+            };
+            const routes = [
+                { route: '/api/test', router: routers() }
+            ];
+
+            const opt = {
+                name: options.serviceName,
+                routes: routes,
+                port: options.port,
+                rateLimit: {
+                    route: '/api',
+                    ms: 2000,
+                    max: 5,
+                    delay: 0
+                }
+            };
+            rest.start(opt).then(function (result) {
+                const promises = [];
+                for (let i = 0; i < 10; i++) {
+                    promises.push(_request({ uri: 'http://localhost:3000/api/test' }))
+                }
+                Promise.all(promises).catch(response => {
+                    expect(response.statusCode).to.equal(429);
+                    expect(response.statusMessage).to.equal('Too Many Requests');
+                    // the redis store was never engaged, so the default
+                    // in-memory store is the one enforcing the rate limit
+                    expect(redisClient.multi.callCount).to.equal(0);
                     done();
                 });
             });
